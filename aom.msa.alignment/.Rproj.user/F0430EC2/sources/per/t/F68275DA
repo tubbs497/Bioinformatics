@@ -1,0 +1,28 @@
+{
+    "id": "F68275DA",
+    "path": null,
+    "project_path": null,
+    "type": "object_explorer",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1707146109989.0,
+    "source_on_save": false,
+    "relative_order": 6,
+    "properties": {
+        "id": "25eb118da90349648805d5ea0568d079",
+        "name": "aom.seqs",
+        "title": "aom.seqs",
+        "language": "R",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 2478510836879076404,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1707146109989,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -5,7 +5,7 @@
 ###Packages####################33
 
 ##install/load packages
-pacman::p_load(msa,genepop,seqinr,Biostrings,tidyverse)
+pacman::p_load(msa,genepop,seqinr,Biostrings,tidyverse,phangorn)
 
 
 ####from msa document##############################
@@ -52,3 +52,31 @@ mean(c)#126
 
 GC = (142+126)/644
 GC#0.4161491
+
+
+
+###convert to seqinr format
+
+
+aom.aline.seq = msaConvert(aom.alignment,"seqinr::alignment")
+
+
+aom.dist = dist.alignment(aom.aline.seq,"identity")
+aom.dist.mat = as.matrix(aom.dist)
+
+###convert to amino acid
+
+
+aom.translated <- translate(aom.seqs, "solve")
+#Error in match(x, table, nomatch = 0L) : 
+#  'match' requires vector arguments
+
+
+
+
+
+
+
+##convert to fasta file
+Alignment_aomDat = msaConvert(aom.alignment, type="phangorn::phyDat")
+write.phyDat(Alignment_aomDat, "alignment.fasta", format = "fasta")
