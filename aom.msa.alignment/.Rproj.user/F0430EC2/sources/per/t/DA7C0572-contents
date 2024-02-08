@@ -67,11 +67,11 @@ aom.dist.mat = as.matrix(aom.dist)
 ###convert to amino acid
 
 
-aom.translated <- translate(aom.seqs, "solve")
+aom.translated = translate(aom.seqs)
 #Error in match(x, table, nomatch = 0L) : 
 #  'match' requires vector arguments
 
-
+#need to do it on individual sequences?
 
 
 
