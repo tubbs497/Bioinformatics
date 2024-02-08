@@ -30,6 +30,11 @@ getwd()
 aom.seqs <-readDNAStringSet("/Users/trevo/OneDrive/Documents/GitHub/Bioinformatics/aom.msa.alignment/amoA.msa.fasta",
                             format = "fasta")
 
+aom.seqs2 <- Biostrings::readDNAStringSet("/Users/trevo/OneDrive/Documents/GitHub/Bioinformatics/aom.msa.alignment/amoA.msa.fasta",
+                             format = "fasta",
+                             use.names = TRUE)
+
+
 
 aom.alignment <- msa(aom.seqs, method = "ClustalW")
 
@@ -66,12 +71,11 @@ aom.dist.mat = as.matrix(aom.dist)
 
 ###convert to amino acid
 
+#convert a single dna sequence...the 3rd thing in my object was missing a base at pos 97
+aom.translated = translate(aom.seqs[2])
 
-aom.translated = translate(aom.seqs)
-#Error in match(x, table, nomatch = 0L) : 
-#  'match' requires vector arguments
-
-#need to do it on individual sequences?
+Biostrings::writeXStringSet(aom.translated,"amino.acid_aom.fasta",
+                                      format = "fasta")
 
 
 
