@@ -74,11 +74,11 @@ aom.dist.mat = as.matrix(aom.dist)
 #convert a single dna sequence...the 3rd thing in my object was missing a base at pos 97
 aom.translated = translate(aom.seqs[2])
 
+print(aom.translated)
+
+#export amino acid sequence to fasta format
 Biostrings::writeXStringSet(aom.translated,"amino.acid_aom.fasta",
                                       format = "fasta")
-
-
-
 
 
 ##convert to fasta file
