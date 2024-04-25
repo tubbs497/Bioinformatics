@@ -1,0 +1,201 @@
+# USE THIS EVERYTIME YOU OPEN UBUNTU FOR QIIME2 WORKs
+conda activate qiime2-2023.5
+
+
+# USE THIS EVERYTIME YOU OPEN UBUNTU FOR QIIME2 WORKs
+conda activate qiime2-2023.5
+
+# Go to project folder (where sequences and manifest/metadata files are )
+cd projects/wc1.syn.epa.shelf
+
+
+# Import manifest file (fld samples)#############################
+
+mkdir demux
+
+qiime tools import \
+  --type 'SampleData[PairedEndSequencesWithQuality]' \
+  --input-path wc1.syn.epa.manifest.tsv \
+  --output-path ./demux/wc1.syn.epa.demux.qza \
+  --input-format PairedEndFastqManifestPhred33V2
+
+# Summarize data (already demultiplexed). #FILES THAT END IN '.QZV' ARE VISUALIZATION FILES WHICH CAN BE VIEWED ON QIIME2 VIEW (https://view.qiime2.org/)
+qiime demux summarize \
+  --i-data ./demux/wc1.syn.epa.demux.qza \
+  --o-visualization ./demux/wc1.syn.epa.demux.qzv#F=none R= 227
+
+
+#DADA2 FLD###########################
+
+
+#Make DADA2 folder
+mkdir dada2
+
+
+
+qiime dada2 denoise-paired \
+  --i-demultiplexed-seqs ./demux/wc1.syn.epa.demux.qza \
+  --p-trunc-len-f 299 \
+  --p-trunc-len-r 227 \
+  --o-representative-sequences ./dada2/wc1.syn.epa.pair.rep-seqs.qza \
+  --o-table ./dada2/wc1.syn.epa.pair.table.qza \
+  --o-denoising-stats ./dada2/wc1.syn.epa.pair.stats.qza
+
+
+
+
+
+
+
+#######DADA2 EPA WC (Previously imported)####################################
+
+# Summarize data (already demultiplexed). #FILES THAT END IN '.QZV' ARE VISUALIZATION FILES WHICH CAN BE VIEWED ON QIIME2 VIEW (https://view.qiime2.org/)
+qiime demux summarize \
+  --i-data ./demux/wc1.epa.shelf.demux.qza \
+  --o-visualization ./demux/wc1.epa.shelf.demux.qzv ###### Median Q score drops below 30 F= 263   R= 272
+
+
+########################################################################################DADA2 DENOISING#############################################################################
+#DADA2 WC....take already made wc1 and merge wit above
+
+
+qiime dada2 denoise-paired \
+  --i-demultiplexed-seqs ./demux/wc1.epa.shelf.demux.qza \
+  --p-trunc-len-f 221 \
+  --p-trunc-len-r 223 \
+  --o-representative-sequences ./dada2/wc1.1epa.shelf.paired.rep-seqs.qza \
+  --o-table ./dada2/wc1.1epa.shelf.paired.table.qza \
+  --o-denoising-stats ./dada2/wc1.1.epa.shelf.paired.stats.qza
+
+
+
+
+
+###################################################MERGE DataSETS######################################################################################
+cd dada2
+qiime feature-table merge \
+  --i-tables wc1.epa.shelf.f_r.table.qza wc1.syn.epa.pair.table.qza \
+  --o-merged-table wc1.syn.epa.merged.feature.table.qza
+
+#^Summarize (Now shows overall DADA2 ASV frequency data for all runs)
+qiime feature-table summarize \
+  --i-table ./dada2/wc1.syn.epa.merged.feature.table.qza \
+  --o-visualization ./dada2/wc1.syn.epa.merged.feature.table.qzv \
+  --m-sample-metadata-file six.mile.metadata.tsv
+
+#Merge representative seqs data
+
+
+qiime feature-table merge-seqs \
+  --i-data wc1.syn.epa.pair.rep-seqs.qza  \
+  --i-data wc1.epa.shelf.f_r.rep-seqs.qza \
+  --o-merged-data wc1.syn.epa.merged.rep-seqs.qza
+  
+#^Summarize (Create mapping feature of IDs to sequences and links to easily BLAST each sequence against NCBI database)
+qiime feature-table tabulate-seqs \
+  --i-data wc1.syn.epa.merged.rep-seqs.qza\
+  --o-visualization wc1.syn.epa.merged.rep-seqs.qzv
+
+
+
+###filter after merging
+
+#####example of removing only features (ASVs) presenet in only one sample
+qiime feature-table filter-features \
+  --i-table wc1.syn.epa.merged.feature.table.qza \
+  --p-min-samples 2 \
+  --o-filtered-table wc1.syn.epa.merged.filtered-table.qza
+
+
+
+
+#########################################################################################TAXONOMY#######################################################################################
+# Create taxonomy folder
+
+(in project folder)
+mkdir taxonomy
+
+# Takes you to profile folder
+cd
+
+
+# Use naive bayes for classify taxonomy of your samples
+qiime feature-classifier classify-sklearn \
+   --i-classifier ./silva_138.1/silva_515-926/silva-138.1-ssu-nr99-515f-926r-classifier.qza \
+   --i-reads ./projects/wc1.syn.epa.shelf/dada2/wc1.syn.epa.merged.rep-seqs.qza \
+  --o-classification ./projects/wc1.syn.epa.shelf/taxonomy/wc1.syn.epa.shelf.taxonomy.qza
+
+#Return to epa shelf folder
+cd projects/wc1.syn.epa.shelf
+
+# Remove Chloroplast, Mitochondria, and Eukaryote sequence reads
+ qiime taxa filter-table \
+     --i-table ./dada2/wc1.syn.epa.merged.filtered-table.qza \
+     --i-taxonomy ./taxonomy/wc1.syn.epa.shelf.taxonomy.qza \
+     --p-exclude mitochondria,chloroplast,eukaryota \
+     --o-filtered-table wc1.syn.epa.shelf.tax.filtered.table.qza
+
+
+
+#Taking only f__Cyanobiaceae and filtering chloroplast,mitochondria and eukaryote
+
+qiime taxa filter-seqs \
+  --i-sequences   ./dada2/wc1.syn.epa.merged.rep-seqs.qza  \
+  --i-taxonomy ./taxonomy/wc1.syn.epa.shelf.taxonomy.qza \
+  --p-include  f__Cyanobiaceae  \
+  --p-exclude mitochondria,chloroplast,eukaryota \
+  --o-filtered-sequences wc1.syn.epa.cyanob.rep-seqs.qza
+
+#export rep sequences
+qiime tools export \
+  --input-path wc1.syn.epa.cyanob.rep-seqs.qza \
+  --output-path wc1.syn.epa.cyanob.rep-seqs.fasta
+
+
+
+
+#Get g__Prochlorothrix_PCC-9006 sequence for outgroup
+qiime taxa filter-seqs \
+  --i-sequences   ./dada2/wc1.syn.epa.merged.rep-seqs.qza  \
+  --i-taxonomy ./taxonomy/wc1.syn.epa.shelf.taxonomy.qza \
+  --p-include  g__Prochlorothrix_PCC-9006  \
+  --p-exclude mitochondria,chloroplast,eukaryota \
+  --o-filtered-sequences wc1.syn.epa.out.rep-seqs.qza
+
+
+#export rep sequences
+qiime tools export \
+  --input-path wc1.syn.epa.out.rep-seqs.qza \
+  --output-path wc1.syn.epa.outgroup.rep-seqs.qza
+
+#########################EXPORT DATA#############################
+cd  projects/wc1.syn.epa.shelf
+#Create .biom file of sequence counts (filtered sequences) 
+qiime tools export \
+  --input-path wc1.syn.epa.shelf.tax.filtered.table.qza \ 
+  --output-path wc1.syn.epa.shelf.feature.table
+
+
+
+qiime tools export \--input-path wc1.syn.epa.shelf.tax.filtered.table.qza \--output-path wc1.syn.epa.shelf.feature.table 
+  
+  
+  
+#Create .tsv file of sequence counts (filtered sequences) and place in new folder
+biom convert -i ./wc1.syn.epa.shelf.feature.table/feature-table.biom -o  wc1.syn.epa.shelf.feature.table.tsv  --to-tsv
+
+#Create .biom file of taxonomy (filtered sequences) 
+qiime tools export \--input-path ./taxonomy/wc1.syn.epa.shelf.taxonomy.qza \--output-path wc1.syn.epa.shelf.shelf.taxa.table
+  
+  
+
+#Create .tsv file of taxa and place in new folder
+biom convert -i ws1.epa.shelf.feature.table/taxa-table.biom -o ws1.epa.shelf.feature.table/ws1.epa.shelf.taxa.table.tsv --to-tsv
+
+
+
+
+
+
+
+

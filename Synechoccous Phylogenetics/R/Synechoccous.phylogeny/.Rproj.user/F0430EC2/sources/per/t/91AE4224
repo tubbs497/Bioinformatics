@@ -1,0 +1,27 @@
+{
+    "id": "91AE4224",
+    "path": "~/GitHub/Bioinformatics/Synechoccous Phylogenetics/R/Synechoccous.phylogeny/picocyano.tree.R",
+    "project_path": "picocyano.tree.R",
+    "type": "r_source",
+    "hash": "3961307017",
+    "contents": "",
+    "dirty": false,
+    "created": 1713729450272.0,
+    "source_on_save": false,
+    "relative_order": 6,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "45,0",
+        "scrollLine": "16"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1714055132,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1714055132997,
+    "read_only": false,
+    "read_only_alternatives": []
+}
